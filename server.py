@@ -22,12 +22,12 @@ def get_bound_socket(host, port):
     sock = get_socket()
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((host, port))
-    logger.debug('Created a socket bound to %s:%s' % (host, port))
+    logger.debug(f'Created a socket bound to {host}:{port}')
     return sock
 
 
 def get_ssl_wrapped_socket(host, port):
-    logger.debug('Creating an SSL wrapped socket')
+    logger.debug(f'Creating an SSL wrapped socket')
 
     # Create the upstream socket
     sock = get_socket()
@@ -44,33 +44,33 @@ def get_ssl_wrapped_socket(host, port):
 
 
 def resolve(query):
-    logger.info('Resolving DNS query over TLS on server %s and port %s' % (cloudflare_host, cloudflare_port))
+    logger.info(f'Resolve DNS over TLS')
     wrapped_socket = get_ssl_wrapped_socket(cloudflare_host, cloudflare_port)
     wrapped_socket.send(query)
     res = wrapped_socket.recv(1024)
     wrapped_socket.close()
-    logger.debug('Closed the socket connecting to %s' % cloudflare_host)
+    logger.debug(f'Closed the socket connecting to {cloudflare_host}')
     return res
 
 
 def receive(sock, address):
     query = sock.recv(1024)
-    logger.info('Received a DNS query from %s' % str(address))
+    logger.info(f'Received a DNS query from {address}') 
 
     try:
         logger.debug('Attempting to resolve DNS query...')
         response = resolve(query)
         if response:
-            logger.info('DNS server resolved address %s' % str(address))
+            logger.info(f'DNS server resolved address {address}')
             sock.send(response)
-            logger.debug('Response sent to client over the socket connection')
+            logger.debug('Response sent to client over socket connection')
         else:
             logger.debug('Response was empty')
     except Exception as e:
-        logger.error('An error occurred: %s' % str(e))
+        logger.error('An error occurred: {e}')
     finally:
         sock.close()
-        logger.debug('Connection from %s was closed' % str(address))
+        logger.debug(f'Connection from {address} was closed')
 
 
 # Main
@@ -80,10 +80,10 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 s = get_bound_socket('', port)
 s.listen(number_of_connections)
-logger.info('Server started and listening on %s:%s' % (host, port))
+logger.info(f'Server started and listening on {host}:{port}')
 
 while True:
     connection, address = s.accept()
-    logger.debug('Got a connection from %s' % str(address))
+    logger.debug(f'Got a connection from {address}')
     connection.settimeout(timeout)
     threading.Thread(target=receive, args=(connection, address)).start()
