@@ -27,7 +27,7 @@ def get_bound_socket(host, port):
 
 
 def get_ssl_wrapped_socket(host, port):
-    logger.debug(f'Creating an SSL wrapped socket')
+    logger.debug('Creating an SSL wrapped socket')
 
     # Create the upstream socket
     sock = get_socket()
@@ -44,7 +44,7 @@ def get_ssl_wrapped_socket(host, port):
 
 
 def resolve(query):
-    logger.info(f'Resolve DNS over TLS')
+    logger.info('Resolve DNS over TLS')
     wrapped_socket = get_ssl_wrapped_socket(cloudflare_host, cloudflare_port)
     wrapped_socket.send(query)
     res = wrapped_socket.recv(1024)
@@ -55,7 +55,7 @@ def resolve(query):
 
 def receive(sock, address):
     query = sock.recv(1024)
-    logger.info(f'Received a DNS query from {address}') 
+    logger.info(f'Received a DNS query from {address}')
 
     try:
         logger.debug('Attempting to resolve DNS query...')
@@ -66,7 +66,7 @@ def receive(sock, address):
             logger.debug('Response sent to client over socket connection')
         else:
             logger.debug('Response was empty')
-    except Exception as e:
+    except Exception:
         logger.error('An error occurred: {e}')
     finally:
         sock.close()
